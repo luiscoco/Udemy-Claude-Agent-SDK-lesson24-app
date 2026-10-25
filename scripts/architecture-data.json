@@ -1,0 +1,273 @@
+{
+  "lanes": [
+    "Student UI",
+    "Node host",
+    "SDK MCP client",
+    "External servers",
+    "Claude model"
+  ],
+  "arrows": [
+    [
+      0,
+      1,
+      "1. Validate the experiment"
+    ],
+    [
+      1,
+      3,
+      "2. Declare the stdio command"
+    ],
+    [
+      1,
+      3,
+      "3. Declare the HTTP server"
+    ],
+    [
+      1,
+      2,
+      "4. Write the project config"
+    ],
+    [
+      1,
+      2,
+      "5. Enable the project setting source"
+    ],
+    [
+      1,
+      2,
+      "6. Approve the intended tool names"
+    ],
+    [
+      1,
+      2,
+      "7. Start the real SDK query"
+    ],
+    [
+      2,
+      1,
+      "8. Preserve initialization status"
+    ],
+    [
+      1,
+      2,
+      "9. Poll current server state"
+    ],
+    [
+      4,
+      2,
+      "10. Observe the requested tool call"
+    ],
+    [
+      2,
+      1,
+      "11. Enforce the classroom boundary"
+    ],
+    [
+      3,
+      2,
+      "12. Record actual completion"
+    ],
+    [
+      1,
+      0,
+      "13. Render answers with evidence"
+    ]
+  ],
+  "steps": [
+    {
+      "number": 1,
+      "title": "Validate the experiment",
+      "source": "src/external.ts",
+      "code": "return { mode: (value as RunConfig).mode };\n}\nexport function filesystemConfig(",
+      "language": "typescript",
+      "explanation": "Accept one of the seven fixed tasks. The browser cannot supply arbitrary server commands, URLs or filesystem roots.",
+      "firstLine": 32,
+      "lastLine": 34,
+      "anchors": [
+        "return { mode: (value as RunConfig).mode };"
+      ],
+      "sourceSHA256": "9f3d0df7d83e1193d12c79ede36e8b7c486110a50ec651184fdcba807ca131a1",
+      "narration": "Step 1. Accept one of the seven fixed tasks. The browser cannot supply arbitrary server commands, URLs or filesystem roots. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 2,
+      "title": "Declare the stdio command",
+      "source": "src/external.ts",
+      "code": "command: process.execPath,\n    args: delayed\n      ? [resolve(ROOT, \"scripts/delayed-filesystem.mjs\"), server, cwd, \"2000\"]\n      : [server, cwd],\n    env: { ANTHROPIC_API_KEY: \"\" },\n    alwaysLoad: true,",
+      "language": "typescript",
+      "explanation": "Launch the pinned official filesystem server with an argument array and only the owned classroom root. The real model API key is not supplied to that process.",
+      "firstLine": 44,
+      "lastLine": 49,
+      "anchors": [
+        "command: process.execPath,"
+      ],
+      "sourceSHA256": "9f3d0df7d83e1193d12c79ede36e8b7c486110a50ec651184fdcba807ca131a1",
+      "narration": "Step 2. Launch the pinned official filesystem server with an argument array and only the owned classroom root. The real model API key is not supplied to that process. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 3,
+      "title": "Declare the HTTP server",
+      "source": "src/external.ts",
+      "code": "const docs: McpServerConfig = {\n    type: \"http\",\n    url: DOCS_URL,\n    alwaysLoad: true,\n  };",
+      "language": "typescript",
+      "explanation": "Connect to the real Claude Code docs MCP URL. This is an external HTTP service, distinct from both local stdio and an in-process SDK server.",
+      "firstLine": 97,
+      "lastLine": 101,
+      "anchors": [
+        "const docs: McpServerConfig = {"
+      ],
+      "sourceSHA256": "9f3d0df7d83e1193d12c79ede36e8b7c486110a50ec651184fdcba807ca131a1",
+      "narration": "Step 3. Connect to the real Claude Code docs MCP URL. This is an external HTTP service, distinct from both local stdio and an in-process SDK server. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 4,
+      "title": "Write the project config",
+      "source": "src/external.ts",
+      "code": "if (mode === \"stdio-config\")\n    await writeFile(\n      resolve(cwd, \".mcp.json\"),\n      JSON.stringify(projectConfig, null, 2),\n    );",
+      "language": "typescript",
+      "explanation": "Write an actual .mcp.json into the fresh classroom project. Its filesystem server points only to that controlled folder.",
+      "firstLine": 92,
+      "lastLine": 96,
+      "anchors": [
+        "if (mode === \"stdio-config\")"
+      ],
+      "sourceSHA256": "9f3d0df7d83e1193d12c79ede36e8b7c486110a50ec651184fdcba807ca131a1",
+      "narration": "Step 4. Write an actual .mcp.json into the fresh classroom project. Its filesystem server points only to that controlled folder. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 5,
+      "title": "Enable the project setting source",
+      "source": "src/agent.ts",
+      "code": "settingSources: project ? [\"project\"] : [],\n    settings: project ? { enableAllProjectMcpServers: true } : {},\n    strictMcpConfig: !project,\n    skills: [],",
+      "language": "typescript",
+      "explanation": "The .mcp.json experiment includes the project source and explicitly approves its controlled project server. strictMcpConfig is disabled only for that experiment so project declarations can load.",
+      "firstLine": 58,
+      "lastLine": 61,
+      "anchors": [
+        "settingSources: project ? [\"project\"] : [],"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 5. The .mcp.json experiment includes the project source and explicitly approves its controlled project server. strictMcpConfig is disabled only for that experiment so project declarations can load. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 6,
+      "title": "Approve the intended tool names",
+      "source": "src/external.ts",
+      "code": "if (mode === \"docs-http\") return [DOCS_TOOL];\n  if (mode === \"combined\")\n    return [\"mcp__claude-code-docs__*\", \"mcp__filesystem__list_directory\"];\n  return [\"mcp__filesystem__list_directory\"];\n}",
+      "language": "typescript",
+      "explanation": "Use a fully qualified name for the docs search or a wildcard in the combined experiment. The separate host guard narrows actual actions to search and classroom listing.",
+      "firstLine": 54,
+      "lastLine": 58,
+      "anchors": [
+        "if (mode === \"docs-http\") return [DOCS_TOOL];"
+      ],
+      "sourceSHA256": "9f3d0df7d83e1193d12c79ede36e8b7c486110a50ec651184fdcba807ca131a1",
+      "narration": "Step 6. Use a fully qualified name for the docs search or a wildcard in the combined experiment. The separate host guard narrows actual actions to search and classroom listing. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 7,
+      "title": "Start the real SDK query",
+      "source": "src/agent.ts",
+      "code": "const run = query({ prompt: PROMPTS[c.mode](d.cwd), options });\n  let text = \"\",\n    status = \"no_result\",",
+      "language": "typescript",
+      "explanation": "Pass the chosen server declarations to query. The SDK spawns stdio processes or opens remote MCP connections and orchestrates model calls.",
+      "firstLine": 145,
+      "lastLine": 147,
+      "anchors": [
+        "const run = query({ prompt: PROMPTS[c.mode](d.cwd), options });"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 7. Pass the chosen server declarations to query. The SDK spawns stdio processes or opens remote MCP connections and orchestrates model calls. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 8,
+      "title": "Preserve initialization status",
+      "source": "src/agent.ts",
+      "code": "initServers = message.mcp_servers.map((s) => ({\n          name: s.name,\n          status: s.status,\n        }));\n        initElapsedMs = Math.round(performance.now() - started);",
+      "language": "typescript",
+      "explanation": "Initialization is a snapshot. Preserve the reported connection statuses and elapsed time instead of assuming every configured server has connected.",
+      "firstLine": 165,
+      "lastLine": 169,
+      "anchors": [
+        "initServers = message.mcp_servers.map((s) => ({"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 8. Initialization is a snapshot. Preserve the reported connection statuses and elapsed time instead of assuming every configured server has connected. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 9,
+      "title": "Poll current server state",
+      "source": "src/agent.ts",
+      "code": "connectedServers = (await run.mcpServerStatus()).map((s) => ({\n            name: s.name,\n            status: s.status,\n            source: s.source,\n            tools: s.tools?.map((t) => t.name),\n          }));",
+      "language": "typescript",
+      "explanation": "Poll actual current status when needed and keep it distinct from the initialization snapshot. Tool lists and configuration source are visible when supplied by the runtime.",
+      "firstLine": 179,
+      "lastLine": 184,
+      "anchors": [
+        "connectedServers = (await run.mcpServerStatus()).map((s) => ({"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 9. Poll actual current status when needed and keep it distinct from the initialization snapshot. Tool lists and configuration source are visible when supplied by the runtime. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 10,
+      "title": "Observe the requested tool call",
+      "source": "src/agent.ts",
+      "code": "if (block.type === \"tool_use\")\n            emit({ type: \"tool\", name: block.name, args: block.input });\n        }",
+      "language": "typescript",
+      "explanation": "Inspect the actual model-requested MCP name and arguments. A discovered tool or prose answer alone does not establish successful execution.",
+      "firstLine": 202,
+      "lastLine": 204,
+      "anchors": [
+        "if (block.type === \"tool_use\")"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 10. Inspect the actual model-requested MCP name and arguments. A discovered tool or prose answer alone does not establish successful execution. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 11,
+      "title": "Enforce the classroom boundary",
+      "source": "src/agent.ts",
+      "code": "attempts.push(input.tool_name);\n              return hostAllows(\n                d.cwd,\n                input.tool_name,\n                input.tool_input as Record<string, unknown>,\n              )",
+      "language": "typescript",
+      "explanation": "The pre-tool hook records attempts and rejects unrelated operations. Native SDK permission rules and the callback then determine approval for allowed classroom targets.",
+      "firstLine": 87,
+      "lastLine": 92,
+      "anchors": [
+        "attempts.push(input.tool_name);"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 11. The pre-tool hook records attempts and rejects unrelated operations. Native SDK permission rules and the callback then determine approval for allowed classroom targets. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 12,
+      "title": "Record actual completion",
+      "source": "src/agent.ts",
+      "code": "if (input.hook_event_name === \"PostToolUse\")\n                completed.push(input.tool_name);\n              return {};",
+      "language": "typescript",
+      "explanation": "PostToolUse records completed calls separately from attempts and callback denials. Directory output comes from the external process and docs output from the real remote server.",
+      "firstLine": 110,
+      "lastLine": 112,
+      "anchors": [
+        "if (input.hook_event_name === \"PostToolUse\")"
+      ],
+      "sourceSHA256": "746976066a17c12bfbea8018c036e45c9aa2bf61a25b9afcd010cd31d76b58af",
+      "narration": "Step 12. PostToolUse records completed calls separately from attempts and callback denials. Directory output comes from the external process and docs output from the real remote server. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 13,
+      "title": "Render answers with evidence",
+      "source": "src/client.ts",
+      "code": "if (e.type === \"answer\") renderMarkdown($(\"answer\"), e.text);\n  if (e.type === \"result\") {\n    $(\"status\").textContent = e.status;",
+      "language": "typescript",
+      "explanation": "Format and sanitize actual Markdown, including documentation links. Keep it beside actual connection status, permissions and tool-result evidence.",
+      "firstLine": 47,
+      "lastLine": 49,
+      "anchors": [
+        "if (e.type === \"answer\") renderMarkdown($(\"answer\"), e.text);"
+      ],
+      "sourceSHA256": "5f2659dafbb3c61fe90a284dff897e106a8a1373225a4d785b6a13b0f29d6773",
+      "narration": "Step 13. Format and sanitize actual Markdown, including documentation links. Keep it beside actual connection status, permissions and tool-result evidence. This source excerpt shows the corresponding application statement."
+    }
+  ]
+}
